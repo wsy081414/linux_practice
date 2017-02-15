@@ -38,6 +38,7 @@ int main()
             start++;
         }
     }
+
     myargv[i-1]=NULL;
     pid_t pid=fork();
     if(pid==0)

@@ -1,0 +1,31 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CLIENT_TYPE	comm.h	16;"	d
+FILEPATH	comm.h	12;"	d
+MYSIZE	comm.h	17;"	d
+PERM	comm.h	14;"	d
+PROJID	comm.h	13;"	d
+SERVER_TYPE	comm.h	15;"	d
+_MSG_SIZE_	comm.h	11;"	d
+__COMM_H__	comm.h	2;"	d
+cc	Makefile	/^cc=gcc$/;"	m
+cli	Makefile	/^cli=client.c$/;"	m
+clisrc	Makefile	/^clisrc=client$/;"	m
+com	Makefile	/^com=comm.c$/;"	m
+commmsg	comm.c	/^static int commmsg(int msgflg)$/;"	f	file:
+createmsg	comm.c	/^int createmsg()$/;"	f
+destorymsg	comm.c	/^int destorymsg(int msgid)$/;"	f
+getmsg	comm.c	/^int getmsg()$/;"	f
+main	client.c	/^int main()$/;"	f
+main	server.c	/^int main()$/;"	f
+msgbuf	comm.h	/^struct msgbuf$/;"	s
+mtext	comm.h	/^    char mtext[MYSIZE];$/;"	m	struct:msgbuf
+mtype	comm.h	/^    long mtype;$/;"	m	struct:msgbuf
+recvmsg	comm.c	/^int recvmsg(int msgid,int type,char out[])$/;"	f
+sendmsg	comm.c	/^int sendmsg(int msgid,long type,const char *msg)$/;"	f
+ser	Makefile	/^ser=server.c$/;"	m
+sersrc	Makefile	/^sersrc=server$/;"	m
