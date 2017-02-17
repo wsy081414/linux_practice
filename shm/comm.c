@@ -9,12 +9,15 @@ int Comm_Shm(int flags)
         perror("ftok");
         return -1;
     }
+    printf("sda");
+
     int shmid=shmget(shmkey,SIZE,flags);
     if(shmget<0)
     {
         perror("shmget");
         return -2;
     }
+    printf("create");
     return shmid;
 }
 int Create_Shm()
@@ -23,7 +26,7 @@ int Create_Shm()
 }
 int Get_Shm()
 {
-    return Comm_Shm(IPC_CREAT);
+    return Comm_Shm(0);
 }
 int Destory_Shm(int shmid)
 {
@@ -44,10 +47,5 @@ char* At_Shm(int shmid)
 int Dt_Shm(char *mem_addr)
 {
     int ret =shmdt(mem_addr);
-    if(ret<0)
-    {
-        perror("shmdt");
-        return -1;
-    }
     return 0;
 }

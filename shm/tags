@@ -4,9 +4,11 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+At_Shm	comm.c	/^char* At_Shm(int shmid)$/;"	f
 Comm_Shm	comm.c	/^int Comm_Shm(int flags)$/;"	f
 Create_Shm	comm.c	/^int Create_Shm()$/;"	f
 Destory_Shm	comm.c	/^int Destory_Shm(int shmid)$/;"	f
+Dt_Shm	comm.c	/^int Dt_Shm(char *mem_addr)$/;"	f
 Get_Shm	comm.c	/^int Get_Shm()$/;"	f
 PATHNAME	comm.h	9;"	d
 PROJID	comm.h	10;"	d
