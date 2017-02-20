@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<pthread.h>
+
 #include<sys/types.h>
 #include<unistd.h>
 
@@ -14,13 +15,15 @@ void * pthread_run(void *arg)
     int i=0;
     while(i<5000)
     {
+       // pthread_mutex_lock(&mutex);
         //在临界区加上互斥锁，这样就可解决线程访问冲突的问题了
-        pthread_mutex_lock(&mutex);
         i++;
         val=count;
+
         printf("pthread: %lu,count:%d\n",pthread_self(),count);
+
         count =val+1;
-        pthread_mutex_unlock(&mutex);
+       // pthread_mutex_unlock(&mutex);
     }
     return NULL;
 }

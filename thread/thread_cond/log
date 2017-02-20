@@ -1,0 +1,8 @@
+gcc -o thread_cond thread_cond.c -lpthread
+thread_cond.c: In function ‘init_list’:
+thread_cond.c:27: warning: assignment from incompatible pointer type
+thread_cond.c: At top level:
+thread_cond.c:34: error: expected ‘)’ before ‘node’
+thread_cond.c: In function ‘destory_list’:
+thread_cond.c:61: error: expected ‘;’ before ‘del_node’
+make: *** [thread_cond] Error 1

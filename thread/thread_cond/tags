@@ -1,0 +1,21 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+buy_newnode	thread_cond.c	/^node_p buy_newnode(int data)$/;"	f
+consumer_run	thread_cond.c	/^void * consumer_run(void *arg)$/;"	f
+data	thread_cond.c	/^    int data;$/;"	m	struct:node	file:
+del_node	thread_cond.c	/^void del_node(node_p node)$/;"	f
+destory_list	thread_cond.c	/^void destory_list(node_p list)$/;"	f
+init_list	thread_cond.c	/^void init_list(node_p list)$/;"	f
+main	thread_cond.c	/^int main()$/;"	f
+next	thread_cond.c	/^    struct node* next;$/;"	m	struct:node	typeref:struct:node::node	file:
+node	thread_cond.c	/^typedef struct node$/;"	s	file:
+node	thread_cond.c	/^}node,* node_p,** node_pp;$/;"	t	typeref:struct:node	file:
+node_p	thread_cond.c	/^}node,* node_p,** node_pp;$/;"	t	typeref:struct:node	file:
+node_pp	thread_cond.c	/^}node,* node_p,** node_pp;$/;"	t	typeref:struct:node	file:
+pop_front	thread_cond.c	/^void pop_front(node_p list,int *data)$/;"	f
+producer_run	thread_cond.c	/^void * producer_run(void *arg)$/;"	f
+push_head	thread_cond.c	/^void push_head(node_p list,int data)$/;"	f
