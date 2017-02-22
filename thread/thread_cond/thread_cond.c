@@ -88,11 +88,13 @@ void * producer_run(void *arg)
     node_p list=(node_p)arg;    
     while(1)
     {
+        sleep(1);
         pthread_mutex_lock(&mylock);
         int data=rand()%1000;
         push_head(list,data);
-        pthread_mutex_unlock(&mylock);
+        sleep(1);
         printf("producer: data:%d\n",data);
+        pthread_mutex_unlock(&mylock);
         pthread_cond_signal(&mycond);
     }
 
@@ -109,9 +111,10 @@ void * consumer_run(void *arg)
           pthread_cond_wait(&mycond,&mylock);
       }
         int data=0;
-        pthread_mutex_unlock(&mylock);
         pop_front(list,&data);
+        sleep(1);
         printf("consumer :data:%d\n",data);
+        pthread_mutex_unlock(&mylock);
     }
     
 }
