@@ -26,13 +26,13 @@ void* producer_run(void *arg)
     {
         sem_wait(&pro);
  
-        pthread_mutex_lock(&mutex);
+//        pthread_mutex_lock(&mutex);
         int prodata=rand()%1000;
         i%=Blank;
         bank[i]=prodata;
         printf("producer make done!!,data:%d\n",prodata);
         i++;
-        pthread_mutex_unlock(&mutex);
+//        pthread_mutex_unlock(&mutex);
         sem_post(&cons);
         sleep(1);
     }
@@ -43,12 +43,12 @@ void* consumer_run(void *arg)
     while(1)
     {
         sem_wait(&cons);
-        pthread_mutex_lock(&mutex1);
+//        pthread_mutex_lock(&mutex1);
         c%=Blank;
         int consudata=bank[c];
         printf("consumer make done,data:%d\n",consudata);
         c++;
-        pthread_mutex_unlock(&mutex1);
+//        pthread_mutex_unlock(&mutex1);
         sem_post(&pro);
         sleep(1);
     }
