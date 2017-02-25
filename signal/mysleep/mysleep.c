@@ -13,9 +13,10 @@ void mysleep(int seconds)
     sigemptyset(&set.sa_mask);
     set.sa_flags=0;
     sigaction(SIGALRM,&set,&oset);
-    //设置闹钟
+    //这里我们首先阻塞SIGALRM
     alarm(seconds);
-    //这里闹钟到时间发送信号SIGALRM，然后执行信号处理函数，然后pause返回错误码-1，
+    
+    //解除阻塞SIGALRM信号
     pause();
     unsigned int unslept=alarm(0);
     sigaction(SIGALRM,&oset,NULL);
