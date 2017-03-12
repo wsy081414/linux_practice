@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
          }
     }
 
-
+    clsoe(sock);
+    close(listen_sock);
     return 0;
 }
 
