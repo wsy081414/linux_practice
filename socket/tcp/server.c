@@ -73,14 +73,13 @@ int main(int argc, char *argv[])
             }
             else
             {
-                printf("client quit\n");
+                printf("client quit,\n");
                 break;
             }
          }
     }
 
-    clsoe(sock);
-    close(listen_sock);
+
     return 0;
 }
 

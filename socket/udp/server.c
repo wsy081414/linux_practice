@@ -1,5 +1,11 @@
 #include<stdio.h>
 #include<unistd.h>
+#include<sys/types.h>
+#include<sys/socket.h>
+#include<stdlib.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include<string.h>
 
 int main(int argc,char *argv[])
 {
@@ -15,11 +21,15 @@ int main(int argc,char *argv[])
         perror("socket");
         return 2;
     }
-    
+
+    int opt = 1;
+    setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
+
     struct sockaddr_in local;
     local.sin_family = AF_INET;
-    local.sin_port = htons(atoi(argc[2]));
-    local.sin_addr.s_addr = inet_addr(argc[1]);
+    local.sin_port = htons(atoi(argv[2]));
+    local.sin_addr.s_addr = inet_addr(argv[1]);
+    socklen_t socklen = sizeof(local);
 
     if(bind(sock,(struct sockaddr *)&local,sizeof(local)) < 0)
     {
@@ -27,13 +37,36 @@ int main(int argc,char *argv[])
         return 3;
     }
     
+    
+    struct sockaddr_in peer;
+    peer.sin_family = AF_INET;
+    peer.sin_port = htons(atoi(argv[2]));
+    peer.sin_addr.s_addr = inet_addr(argv[1]);
+    //socklen_t socklen = sizeof(local);
+    
     while(1)
-    {
-        printf("Client send#\n");
-        
-        
+    {  
+        char buf[1024];
+        memset(buf,0,sizeof(buf));
+        ssize_t s = recvfrom(sock,buf,sizeof(buf),0, (struct sockaddr *)&peer,&socklen);
+        buf[s-1]='\0';
+        printf("port: %d\n",ntohs(peer.sin_port));
+        if(s == 0)
+        {
+            continue;
+        }
+        else if(s < 0)
+        {
+            perror("resvfrom");
+            close(sock);
+            return 4;
+        }
+        else
+        {
+            printf("recvfrom :%s\n",buf);
+        }
     }
 
-    struct_
+    
     return 0;
 }

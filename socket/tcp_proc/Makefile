@@ -4,9 +4,9 @@
 all:client server
 
 client:client.c
-	clang -o client client.c
+	gcc -o $@ $^ -g
 server:server.c
-	clang -o server server.c
+	gcc -o $@ $^ -g
 
 .PHONY :clean
 clean:
