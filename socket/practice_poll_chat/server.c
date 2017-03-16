@@ -69,26 +69,26 @@ int main(int argc, char *argv[])
         printf("Usage: %s [local_ip] [local_port]\n",argv[0]);
         return 1;
     }
-    
+
     //建立监听socket 
     int listen_sock = StartUp(atoi(argv[2]),argv[1]);
 
     //创建users数组，分配client数据对象的文件描述符。
     struct client_data* users = (struct client_data *)malloc(sizeof(struct client_data)*LIMIT_FD);
     //client_data users[LIMIT_FD];
-    
+
     //虽然有足够多的client_data,但是依然要限制用户数量
     struct pollfd fds[LIMIT_USER+1];
 
     int user_count = 0;
     int i = 0;
-    
+
     for(i = 1; i <= LIMIT_USER; ++i)
     {
         fds[i].fd = -1;
         fds[i].events = 0;
     }
-    
+
     fds[0].fd = listen_sock;
     fds[0].events = POLLIN|POLLERR;
     fds[0].revents = 0;
@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
     {
         //永远等待，当准备好再去提交给应用程序。
         int ret = poll(fds, user_count+1, -1);
+
         if(ret < 0)
         {
             printf("poll faile\n");
@@ -107,7 +108,7 @@ int main(int argc, char *argv[])
         for(i = 0; i < user_count+1; ++i)
         {
             //此时为监听套接字，有新连接来
-            if((fds[i].fd == listen_sock)&& (fds[i].revents & POLLIN))
+            if((fds[i].fd == listen_sock) && (fds[i].revents & POLLIN))
             {
                 struct sockaddr_in peer;
                 socklen_t peer_len = sizeof(peer);
@@ -121,18 +122,19 @@ int main(int argc, char *argv[])
                 }
 
                 printf("new user :ip:%s,port:%d\n",inet_ntoa(peer.sin_addr),ntohs(peer.sin_port));
+
                 // 如果请求太多，则关闭请求连接。
                 if(user_count >= LIMIT_USER)
                 {
-                    const char *msg = "Too many users!!!";
-                    printf("%s\n",msg);
-                    write(sock, msg, strlen(msg)-1 );
+                    const char *msg = "Too many users!!!\n";
+                    printf("%s",msg);
+                    write(sock, msg, sizeof(msg) );
                     close(sock);
                     continue;
                 }
                 //相对于新连接，同时去修改fds，和users数组对应连接的文件描述符sock的客户数据。
-                users[sock].address = peer;
                 user_count++;
+                users[sock].address = peer;
 
                 //设置非阻塞
                 setnoblocking(sock);
@@ -152,7 +154,7 @@ int main(int argc, char *argv[])
             //如果客户端关闭连接。
             else if(fds[i].revents & POLLRDHUP)
             {
-                //服务器也许要关闭连接，并且吧user_count减1
+                //服务器也许要关闭连接，并且把user_count减1
                 //这里的减相当于去移动了文件描述符，把最大的放到了需要减的那个了。
                 //
                 users[fds[i].fd] = users[fds[user_count].fd];
@@ -162,14 +164,15 @@ int main(int argc, char *argv[])
                 user_count--;
                 printf("a client left\n");
             }
-            //连接套接字可读
+//连接套接字可读
             else if(fds[i].revents & POLLIN)
             {
                 printf("haha\n");
                 int sock = fds[i].fd;
-                memset(users[sock].buf, 0,BUF_SIZE);
-                ret = read(sock, users[sock].buf, BUF_SIZE-1);
-                
+                memset(users[sock].buf, 0,sizeof(users[sock].buf));
+                ret = read(sock, users[sock].buf, sizeof(users[sock].buf) - 1);
+
+                printf("client :%s\n",users[sock].buf);
                 if(ret > 0)
                 {
                     //收到客户数据，此时通知其他的socket接受数据
@@ -185,7 +188,6 @@ int main(int argc, char *argv[])
                         fds[j].events |= POLLOUT;
 
                         users[fds[j].fd].write_buf = users[sock].buf;
-                        printf("client :%s\n",users[fds[j].fd].write_buf);
                     }
                 }
                 else if(ret < 0)
@@ -212,16 +214,16 @@ int main(int argc, char *argv[])
                     continue;
                 }
                 ret = write(sock,users[sock].write_buf,\
-                          BUF_SIZE-1);
+                            BUF_SIZE-1);
                 users[sock].write_buf = NULL;
                 //写完以后重新注册fds[i]的可读事件
                 fds[i].events |= ~POLLOUT;
                 fds[i].events |= POLLIN;
             }
-        }
-    }
+            }
+            }
 
-    
+
     close(listen_sock);
     return 0;
 }
