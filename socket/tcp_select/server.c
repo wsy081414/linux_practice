@@ -26,6 +26,9 @@ int startup(int port,char *ip)
         exit(2);
     }
 
+    //int opt = 1;
+    //setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,&opt, sizeof(opt));
+
     struct sockaddr_in local;
     local.sin_family = AF_INET;
     local.sin_port = htons(port);
@@ -67,33 +70,30 @@ int main(int argc,char *argv[])
     {
         //监听套接字插入gfds
         gfds[0] = listen_sock;
-        
         //定义max最终在nfds使用
-        int max_fd = -1;
-        
+        int max_fd = -1;     
         //创建文件描述符集
         fd_set rfds;
-        
         //对文件描述符集进行初始化
         FD_ZERO(&rfds);
-        
         //将监听套接字设置在文件描述符集合当中
         FD_SET(listen_sock,&rfds);
-
         //进行查找最大的max_fd, 为了后续操作nfds
         int k = 0;
         for(;k < __SIZE__;k++)
         {
             if(gfds[k] != -1)
             {
-                if(k > max_fd)
+                //记得最大的文件描述符的内容和gfds内容进行比较
+                if(gfds[k] > max_fd)
                 {
-                    max_fd = k;
+                    max_fd = gfds[k];
                 }
+
+                FD_SET(gfds[k],&rfds);
             }
         }
-        printf("max_fd : %d\n",max_fd);
-        
+
         //设置timeout值
         struct timeval timeout={5,0};
 
@@ -119,7 +119,8 @@ int main(int argc,char *argv[])
                 {
                     if(gfds[j] == -1)
                     {
-                        continue;
+                        //continue;
+                        break;
                     }
                     else if(FD_ISSET(gfds[j],&rfds) && gfds[j] == listen_sock)
                     {
@@ -130,6 +131,7 @@ int main(int argc,char *argv[])
                         printf("client :ip:%s,port:%d\n",\
                                inet_ntoa(peer.sin_addr),\
                                ntohs(peer.sin_port));
+                        printf("sock: %d\n",sock);
                         if(sock < 0)
                         {
                             perror("accept");
@@ -147,8 +149,9 @@ int main(int argc,char *argv[])
                                     break;
                                 }
                             }
-                            if(k == __SIZE__)
+                            if(m == __SIZE__)
                             {
+                                close(sock);
                                 printf("too many client\n");
                             }
                         }
@@ -156,7 +159,7 @@ int main(int argc,char *argv[])
                     else if(FD_ISSET(gfds[j],&rfds))
                     {
                         char buf[1024];
-                        ssize_t _r = read(gfds[j],buf,sizeof(buf-1));
+                        ssize_t _r = read(gfds[j],buf,sizeof(buf)-1);
                         if(_r > 0)
                         {
                             buf[_r] = 0;
@@ -175,13 +178,14 @@ int main(int argc,char *argv[])
                             return 5;
                         }
                     }
-}
-break;
+                }
+                    break;
             }
             break;
         }
         }
-        close(listen_sock);
-        return 0;
+
+    close(listen_sock);
+    return 0;
 }
 

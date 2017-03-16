@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     int listen_sock = StartUp(atoi(argv[2]),argv[1]);
 
     //创建users数组，分配client数据对象的文件描述符。
-    struct client_data* users = malloc(sizeof(struct client_data)*LIMIT_FD);
+    struct client_data* users = (struct client_data *)malloc(sizeof(struct client_data)*LIMIT_FD);
     //client_data users[LIMIT_FD];
     
     //虽然有足够多的client_data,但是依然要限制用户数量
@@ -120,18 +120,19 @@ int main(int argc, char *argv[])
                     continue;
                 }
 
+                printf("new user :ip:%s,port:%d\n",inet_ntoa(peer.sin_addr),ntohs(peer.sin_port));
                 // 如果请求太多，则关闭请求连接。
                 if(user_count >= LIMIT_USER)
                 {
                     const char *msg = "Too many users!!!";
                     printf("%s\n",msg);
-                    write(sock,msg,strlen(msg));
+                    write(sock, msg, strlen(msg)-1 );
                     close(sock);
                     continue;
                 }
                 //相对于新连接，同时去修改fds，和users数组对应连接的文件描述符sock的客户数据。
-                user_count++;
                 users[sock].address = peer;
+                user_count++;
 
                 //设置非阻塞
                 setnoblocking(sock);
@@ -164,15 +165,17 @@ int main(int argc, char *argv[])
             //连接套接字可读
             else if(fds[i].revents & POLLIN)
             {
+                printf("haha\n");
                 int sock = fds[i].fd;
                 memset(users[sock].buf, 0,BUF_SIZE);
                 ret = read(sock, users[sock].buf, BUF_SIZE-1);
+                
                 if(ret > 0)
                 {
                     //收到客户数据，此时通知其他的socket接受数据
                     users[sock].buf[ret] = 0;
                     int j = 0;
-                    for(j = 1; j < user_count; ++j)
+                    for(j = 1; j <= user_count; ++j)
                     {
                         if(fds[j].fd == sock)
                         {
@@ -180,7 +183,9 @@ int main(int argc, char *argv[])
                         }
                         fds[j].events |= ~POLLIN;
                         fds[j].events |= POLLOUT;
+
                         users[fds[j].fd].write_buf = users[sock].buf;
+                        printf("client :%s\n",users[fds[j].fd].write_buf);
                     }
                 }
                 else if(ret < 0)
@@ -206,15 +211,12 @@ int main(int argc, char *argv[])
                 {
                     continue;
                 }
-                ret = send(sock,users[sock].write_buf,\
-                          strlen(users[sock].write_buf),0);
+                ret = write(sock,users[sock].write_buf,\
+                          BUF_SIZE-1);
                 users[sock].write_buf = NULL;
                 //写完以后重新注册fds[i]的可读事件
                 fds[i].events |= ~POLLOUT;
                 fds[i].events |= POLLIN;
-
-
-
             }
         }
     }

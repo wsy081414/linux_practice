@@ -16,6 +16,8 @@ int startup(int port,char *ip)
         perror("socket");
         exit(2);
     }
+    int opt = 1;
+    setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
  
     struct sockaddr_in local;
     local.sin_family = AF_INET;
