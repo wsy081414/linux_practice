@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
     //建立监听socket 
     int listen_sock = StartUp(atoi(argv[2]),argv[1]);
 
-    //创建users数组，分配client数据对象的文件描述符。
+    //创建users数组，分配client数据对象的文件描述符。利用它来进行索引用户数据以及发数据
     struct client_data* users = (struct client_data *)malloc(sizeof(struct client_data)*LIMIT_FD);
     //client_data users[LIMIT_FD];
 
-    //虽然有足够多的client_data,但是依然要限制用户数量
+    //虽然有足够多的client_data,但是依然要限制用户数量，事件最大
     struct pollfd fds[LIMIT_USER+1];
 
     int user_count = 0;
@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
         fds[i].events = 0;
     }
 
-    fds[0].fd = listen_sock;
-    fds[0].events = POLLIN|POLLERR;
+    fds[0].fd = listen_sock;//设置监听端口
+    fds[0].events = POLLIN|POLLERR;//监听端口设置可读和错误事件
     fds[0].revents = 0;
 
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
         for(i = 0; i < user_count+1; ++i)
         {
-            //此时为监听套接字，有新连接来
+            //此时为监听套接字，有新连接来，监听套接字接受到可读事件
             if((fds[i].fd == listen_sock) && (fds[i].revents & POLLIN))
             {
                 struct sockaddr_in peer;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
                 continue;
             }
-            //如果客户端关闭连接。
+            //如果客户端关闭连接。此时检测到客户端断开的请求，所以这个时候触发这个事件
             else if(fds[i].revents & POLLRDHUP)
             {
                 //服务器也许要关闭连接，并且把user_count减1
@@ -167,7 +167,6 @@ int main(int argc, char *argv[])
 //连接套接字可读
             else if(fds[i].revents & POLLIN)
             {
-                printf("haha\n");
                 int sock = fds[i].fd;
                 memset(users[sock].buf, 0,sizeof(users[sock].buf));
                 ret = read(sock, users[sock].buf, sizeof(users[sock].buf) - 1);
