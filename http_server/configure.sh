@@ -1,4 +1,3 @@
-#! /bin/bash
 
 SRC=$(echo *.c)
 OBJ=$(echo ${SRC} | sed 's/\.c/\.o/g')
@@ -8,9 +7,9 @@ OPTION=lpthread
 cat << EOF > Makefile
 
 ${SERVER_NAME} :${OBJ}
-    ${CC} -c \$@ \$^ -${OPTION}
+    ${CC} -o \$@ \$^ -${OPTION}
 %.o :%.c 
-    ${CC} -o \$<
+    ${CC} -c \$<
 
 .PHONY :clean
 clean:

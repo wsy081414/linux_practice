@@ -10,6 +10,9 @@ int startup(const char *_ip, int _port)
         print_log("socket failed",FATAL);
         exit(2);
     }
+
+    int opt = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     
     struct sockaddr_in local;
     local.sin_family = AF_INET;
@@ -44,6 +47,7 @@ void print_log(char *log_massage,int level)
     #endif 
 }
 
+//进行每一行的读取
 static int get_line(int sock, char * buf, int len)
 {
     assert(buf);
@@ -52,20 +56,25 @@ static int get_line(int sock, char * buf, int len)
     char ch='\0';
     int i = 0;
 
+    //判断ch，
     while(i < len -1 && ch != '\n' )
     {
         if(recv(sock, &ch, 1, 0) > 0)
         {
             //如果字符为\r,此时就是需要处理\n的问题了。
-
+            //    \r\n----->\n
+            //    \r----->\n
+            
             if(ch == '\r')
             {
-                //考虑下一个字符是否为\n
+                //考虑下一个字符是否为\n,进行窥探。
                 if( recv(sock, &ch, 1, MSG_PEEK) > 0 && ch == '\n' )
                     recv(sock, &ch, 1, 0);
                 else
                     ch = '\n';
             }
+            
+            //把这一行的内容读取出来，放到buf。
             buf[i++] = ch;
         }
         else
@@ -78,6 +87,9 @@ static int get_line(int sock, char * buf, int len)
 int handler_sock(int sock)
 {
     char buf[SIZE];
+    
+    memset(buf, 0, sizeof(buf));
+    
     if(get_line(sock, buf, sizeof(buf)) < 0)
     {
         print_log("get_line error",WARNING);
@@ -86,6 +98,8 @@ int handler_sock(int sock)
     char method[METHOD_SIZE];
     char url[URL_SIZE];
 
+    memset(method, 0, sizeof(method));
+    memset(url, 0, sizeof(url));
     int i,j;
 
     while(i<sizeof(buf)-1 && j<sizeof(method)-1 && !isspace(buf[i]))
@@ -130,7 +144,7 @@ int handler_sock(int sock)
             cgi=1;   
         }
     }
-
+    printf("%s,%s\n",method,url);
 
 end:
     close(sock);

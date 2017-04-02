@@ -9,6 +9,7 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<assert.h>
+#include<string.h>
 
 #define NORMAL 0
 #define WARNING 1
