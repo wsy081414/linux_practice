@@ -1,17 +1,24 @@
 #!/bin/bash
 
+trap "pwd" 2
 
-read d
-function fun()
-{
-    local i=$1
-    for (( j=0; j<i; j++  ))
-    do
-        echo hello
-    done
-}
 
-fun d
+for(( ; ; ))
+do
+    :
+done
+
+#read d
+#function fun()
+#{
+#    local i=$1
+#    for (( j=0; j<i; j++  ))
+#    do
+#        echo hello
+#    done
+#}
+
+#fun d
 
 #read n
 #until [ $n -eq 0 ]
