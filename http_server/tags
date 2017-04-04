@@ -1,0 +1,19 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+FATAL	httpd.h	15;"	d
+METHOD_SIZE	httpd.h	18;"	d
+NORMAL	httpd.h	13;"	d
+SIZE	httpd.h	17;"	d
+URL_SIZE	httpd.h	19;"	d
+WARNING	httpd.h	14;"	d
+__HTTPD_H__	httpd.h	2;"	d
+accept_request	main.c	/^static void *accept_request(void * arg)$/;"	f	file:
+get_line	httpd.c	/^static int get_line(int sock, char * buf, int len)$/;"	f	file:
+handler_sock	httpd.c	/^int handler_sock(int sock)$/;"	f
+main	main.c	/^int main(int argc,char *argv[])$/;"	f
+print_log	httpd.c	/^void print_log(char *log_massage,int level)$/;"	f
+startup	httpd.c	/^int startup(const char *_ip, int _port)$/;"	f

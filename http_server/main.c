@@ -26,7 +26,7 @@ int main(int argc,char *argv[])
             print_log("accept failed",WARNING);
             continue;
         }
-        //printf("ip :%s port :%d\n",inet_ntoa(peer.sin_addr), peer.sin_port);
+        printf("ip :%s port :%d\n",inet_ntoa(peer.sin_addr), peer.sin_port);
 
         pthread_t tid;
 

@@ -1,9 +1,8 @@
-
-httpd :httpd.o main.o
+httpd:httpd.o main.o
 	gcc -o $@ $^ -lpthread
-%.o :%.c 
+%.o: %.c 
 	gcc -c $<
 
-.PHONY :clean
+.PHONY:clean
 clean:
 	rm -rf httpd httpd.o main.o

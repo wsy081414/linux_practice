@@ -1,3 +1,4 @@
+#! /bin/bash
 
 SRC=$(echo *.c)
 OBJ=$(echo ${SRC} | sed 's/\.c/\.o/g')
