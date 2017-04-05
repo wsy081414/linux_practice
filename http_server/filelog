@@ -1,0 +1,22 @@
+gcc -c httpd.c
+httpd.c: In function ‘clear_header’:
+httpd.c:85: error: expected ‘;’ before ‘return’
+httpd.c: In function ‘echo_www’:
+httpd.c:90: error: ‘O_RDONLY’ undeclared (first use in this function)
+httpd.c:90: error: (Each undeclared identifier is reported only once
+httpd.c:90: error: for each function it appears in.)
+httpd.c:97: warning: passing argument 1 of ‘sprintf’ from incompatible pointer type
+/usr/include/stdio.h:363: note: expected ‘char * __restrict__’ but argument is of type ‘char **’
+httpd.c:104: error: expected expression before ‘)’ token
+httpd.c: In function ‘handler_sock’:
+httpd.c:173: warning: incompatible implicit declaration of built-in function ‘strlen’
+httpd.c:175: warning: incompatible implicit declaration of built-in function ‘strcat’
+httpd.c:178: error: storage size of ‘ispath’ isn’t known
+httpd.c:187: error: ‘S_IFDIR’ undeclared (first use in this function)
+httpd.c:189: warning: incompatible implicit declaration of built-in function ‘strcat’
+httpd.c:191: error: ‘S_IXUSR’ undeclared (first use in this function)
+httpd.c:192: error: ‘S_IXGRP’ undeclared (first use in this function)
+httpd.c:193: error: ‘S_IXOTH’ undeclared (first use in this function)
+httpd.c:207: error: ‘s’ undeclared (first use in this function)
+httpd.c:214: error: expected declaration or statement at end of input
+make: *** [httpd.o] Error 1

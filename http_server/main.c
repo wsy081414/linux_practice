@@ -2,6 +2,7 @@
 static void *accept_request(void * arg)
 {
     int sock = (int )arg;
+    printf("hah\n");
     pthread_detach(pthread_self());
 
     return (void *)handler_sock(sock);

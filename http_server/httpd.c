@@ -81,35 +81,87 @@ static int clear_header(int sock)
     int ret = -1;
     do{
         ret = get_line(sock,buf,sizeof(SIZE));
-    }while(ret != 1 && strcmp(buf, "\n") != 0)
+    }while(ret != 1 && strcmp(buf, "\n") != 0);
     return ret;
+}
+
+static void echo_www(int sock, char *path, int _s)
+{
+    int fd = open(path, O_RDONLY);
+    if(fd < 0)
+    {
+        print_log("open failed!", FATAL);
+        return ;
+    }
+    char buf[SIZE];
+    sprintf(buf,"HTTP/1.0 200 OK \r\n\r\n");
+
+    printf("buf:%s\n",buf);
+    if(send(sock,buf,strlen(buf),0) < 0)
+    {
+        print_log("send filed",FATAL);
+        return;
+    }
+
+    if(sendfile(sock, fd, NULL,_s) < 0)
+    {
+        print_log("sendfile failed",FATAL);
+        return ;
+    }
+
+    close(fd);
+    return;
+}
+
+static int excu_cgi(int sock, char *method, char *path, char* query_string)
+{
+    int ret = 0;
+    if (strcasecmp(method,"GET")==0)
+    {
+        //GET方法
+        clear_header(sock);
+        // 此时的query_string就是记录的参数，后期进行使用就好了。
+    }else{
+        //POST方法，这个时候所需要做的是取出POST的参数，这个POST的参数是在POST的正文处。
+        char buf[SIZE]
+        memset(buf, 0, sizeof(buf));
+        //POST的
+    }//else
+    
 }
 int handler_sock(int sock)
 {
     char buf[SIZE];
     int ret;
+
+    //进行读取一行
     if(get_line(sock, buf, sizeof(buf)) < 0)
     {
         print_log("get_line error",WARNING);
         ret = 6;
-
     }
 
     char method[METHOD_SIZE];
     char url[URL_SIZE];
 
-    int i,j;
+    int i = 0,j = 0;
+    
+    printf("http:%s\n", buf);
 
-    while(i<sizeof(buf)-1 && j<sizeof(method)-1 && !isspace(buf[i]))
+    //进行截取请求方式
+    while(i < sizeof(buf)-1 && j<sizeof(method)-1 && !isspace(buf[i]))
     {
         method[j++] = buf[i++];
     }
-
+    
+    printf("methed:%s\n",method);
     if(strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
+        printf("end\n");
         //echo_error();
         goto end;
     }
+    
 
     if(isspace(buf[i]) && i<sizeof(buf)-1)
     {
@@ -122,8 +174,9 @@ int handler_sock(int sock)
     {
         url[j++]=buf[i++];
     }
-    
-    int cgi;
+   
+    printf("url:%s\n",url);
+    int cgi=0;
     if(strcasecmp(method,"POST")==0)
     {
         cgi=1;
@@ -141,7 +194,7 @@ int handler_sock(int sock)
             query_string++;
             cgi=1;
         }
-
+    }
 
         char path[SIZE];
         sprintf(path, "wwwroot%s", url);
@@ -149,6 +202,8 @@ int handler_sock(int sock)
         {
             strcat(path,"index.html");
         }
+
+        printf("path:%s\n",path);
 
         struct stat ispath;
 
@@ -171,17 +226,19 @@ int handler_sock(int sock)
             }
         }
 
+        printf("path:%s\n",path);
+        printf("cgi:%d\n",cgi);
         if (cgi){
+            //对于cgi模式，我们需要对参数进行处理,method记录请求方法，path记录了资源路径，query_string记录的是参数。
+            ret = excu_cgi(sock, method, path, query_string);
 
         }//fi
         else{
             //非cgi模式，此时需要把这个HTTP报文进行全部访问完毕，防止出现后续出现以后报文粘包问题。
-
             clear_header(sock);
             //接下来进行最简单的非cgi版本的操作，直接把这个资源发送过去。
-            echo_www(sock, path, _s);
+            echo_www(sock, path, sizeof(path));
         }//else
-
 
 end:
     close(sock);
