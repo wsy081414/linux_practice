@@ -116,6 +116,7 @@ static void echo_www(int sock, char *path, int _s)
 static int excu_cgi(int sock, char *method, char *path, char* query_string)
 {
     int ret = 0;
+    int content_length = 0;
     if (strcasecmp(method,"GET")==0)
     {
         //GET方法
@@ -123,9 +124,19 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
         // 此时的query_string就是记录的参数，后期进行使用就好了。
     }else{
         //POST方法，这个时候所需要做的是取出POST的参数，这个POST的参数是在POST的正文处。
-        char buf[SIZE]
+        char buf[SIZE];
         memset(buf, 0, sizeof(buf));
-        //POST的
+        //POST
+        do{
+            ret = get_line(sock, buf, sizeof(buf));
+            if(strncasecmp(buf, "Content-Length: ", strlen("Content-Length: ")))
+            {
+                content_length = atoi (buf+strlen("content_length: "));
+            }
+
+        }while(ret != 1 && strcmp(buf, "\n") != 0);
+
+        
     }//else
     
 }
@@ -174,7 +185,7 @@ int handler_sock(int sock)
     {
         url[j++]=buf[i++];
     }
-   
+    char *query_string =NULL;
     printf("url:%s\n",url);
     int cgi=0;
     if(strcasecmp(method,"POST")==0)
@@ -183,7 +194,7 @@ int handler_sock(int sock)
     }
     if(strcasecmp(method,"GET")==0)
     {
-        char *query_string = url;
+        query_string = url;
         while(*query_string != '?' && *query_string != '\0')
         {
             query_string++;
