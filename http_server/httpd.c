@@ -31,8 +31,29 @@ int startup(const char *_ip, int _port)
 
     return sock;
 }
+void request_404(int sock)
+{
+    char buf[1024];
 
+}
+void echo_error(int sock, int err_code)
+{
+    switch(err_code)
+    {
+        case 401:
+        break;
+        case 404:
+        request_404(sock);
+        break;
+        case 503:
+        break;
+        case 500
+        break;
+        default:
+        break;
+    }
 
+}
 void print_log(char *log_massage,int level)
 {
     char *arr[10]={
@@ -116,7 +137,7 @@ static void echo_www(int sock, char *path, int _s)
 static int excu_cgi(int sock, char *method, char *path, char* query_string)
 {
     int ret = 0;
-    int content_length = 0;
+    int content_length = -1;
     if (strcasecmp(method,"GET")==0)
     {
         //GET方法
@@ -138,7 +159,86 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
 
         
     }//else
-    
+
+    if(content_length < 0)
+    {
+        return 1;
+    }
+
+    char buf[SIZE];
+    sprintf(buf,"HTTP/1.0 200 OK \r\n\r\n"); 
+    send(sock, buf, strlen(buf), 0);
+
+    int input[2];
+    int output[2];
+
+    if(pipe(input) < 0)
+    {
+        return 2;
+    }
+    if(pipe(output) < 0)
+    {
+        return 3;
+    }
+
+    pid_t id = fork();
+    if(id < 0)
+    {
+        return 4;
+    }
+    else if(id == 0){
+        //child
+        close(input[1]);// 关闭写端
+        close(output[0]);//关闭读端
+
+        dup2(input[0], 0);
+        dup2(output[1], 1);
+        
+        char method_env[SIZE/8];
+        char content_len[SIZE/8];
+
+        sprintf(method_env,"METHOD=%s", method);
+        putenv(method_env);
+
+        if(strcasecmp(method,"GET") == 0)
+        {
+            sprintf(content_len, "QUERY_STRING=%s", query_string);
+            putenv(content_len);
+        }
+        else{
+            sprintf(content_len, "CONTENT_LEN=%d", content_length);
+            putenv(content_len);
+        }
+        execl(path,path,NULL);
+        exit(1);
+    }//child 
+    else{
+        //father
+        close(input[0]);
+        close(output[1]);
+
+        if(strcasecmp(method, "GET") == 0){   
+            //GET
+        }
+        else{
+            //POST
+            
+            char ch;
+            int i = 0;
+            for(i = 0; i < content_length; i++)
+            {
+                recv(sock, &ch, 1, 0);
+                write(input[1], &ch, 1);
+            }
+
+            char ouput_data[SIZE];
+            while(read(output[0],&ch,1))
+            {
+                send(sock, &ch, 1, 0);
+            }
+        }
+        waitpid(id,NULL,0);
+    }//father   
 }
 int handler_sock(int sock)
 {
@@ -246,6 +346,7 @@ int handler_sock(int sock)
         }//fi
         else{
             //非cgi模式，此时需要把这个HTTP报文进行全部访问完毕，防止出现后续出现以后报文粘包问题。
+            printf("echo_www:\n");
             clear_header(sock);
             //接下来进行最简单的非cgi版本的操作，直接把这个资源发送过去。
             echo_www(sock, path, sizeof(path));
