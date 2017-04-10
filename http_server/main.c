@@ -2,7 +2,6 @@
 static void *accept_request(void * arg)
 {
     int sock = (int )arg;
-    printf("hah\n");
     pthread_detach(pthread_self());
 
     return (void *)handler_sock(sock);
@@ -16,6 +15,8 @@ int main(int argc,char *argv[])
     }
     int listen_sock = startup(argv[1],atoi(argv[2]));
     
+    int _r = daemon(1,0);
+
     while(1)
     {
         struct sockaddr_in peer;
@@ -27,7 +28,6 @@ int main(int argc,char *argv[])
             print_log("accept failed",WARNING);
             continue;
         }
-        printf("ip :%s port :%d\n",inet_ntoa(peer.sin_addr), peer.sin_port);
 
         pthread_t tid;
 

@@ -7,15 +7,20 @@
 FATAL	httpd.h	18;"	d
 METHOD_SIZE	httpd.h	21;"	d
 NORMAL	httpd.h	16;"	d
+SIZE	cgi/cgi_bin/cgi_math.c	12;"	d	file:
 SIZE	httpd.h	20;"	d
 URL_SIZE	httpd.h	22;"	d
 WARNING	httpd.h	17;"	d
 __HTTPD_H__	httpd.h	2;"	d
 accept_request	main.c	/^static void *accept_request(void * arg)$/;"	f	file:
 clear_header	httpd.c	/^static int clear_header(int sock)$/;"	f	file:
+echo_error	httpd.c	/^void echo_error(int sock, int err_code)$/;"	f
 echo_www	httpd.c	/^static void echo_www(int sock, char *path, int _s)$/;"	f	file:
+excu_cgi	httpd.c	/^static int excu_cgi(int sock, char *method, char *path, char* query_string)$/;"	f	file:
 get_line	httpd.c	/^static int get_line(int sock, char * buf, int len)$/;"	f	file:
 handler_sock	httpd.c	/^int handler_sock(int sock)$/;"	f
+main	cgi/cgi_bin/cgi_math.c	/^int main()$/;"	f
 main	main.c	/^int main(int argc,char *argv[])$/;"	f
 print_log	httpd.c	/^void print_log(char *log_massage,int level)$/;"	f
+request_404	httpd.c	/^void request_404(int sock)$/;"	f
 startup	httpd.c	/^int startup(const char *_ip, int _port)$/;"	f

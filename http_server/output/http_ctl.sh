@@ -14,15 +14,18 @@ function usage()
 function http_start()
 {
     [[ -f $PID ]] && {
-        printf "httpd.pid is exist!\npid is $(cat $PID)\n"
+        printf "httpd.pid is exist! pid is $(cat $PID)\n"
         return
     }
     
     ip=$(grep -E '^IP:' $CONF | awk -F: '{print $2}')
     port=$(grep -E '^PORT:' $CONF |awk -F: '{print $2}')
+    printf "ip:${ip} port:${port},bin: ${BIN}\n"
+    return 
     $BIN $ip $port
     pidof $(basename $BIN) > $PID
-    printf "start done, pid is : $(cat $PID)...\n"
+    printf "start done, pid is : $(cat $pid)...\n"
+
 }
 
 function http_stop()
@@ -32,9 +35,9 @@ function http_stop()
         return
     }
     pid=$(cat $PID)
-    kill -9 ${pid}
+    kill -9 $PID
     rm -f $PID
-    printf "proc $pid stop done ... \n"
+    printf "stop done ... \n"
 }
 
 [[ $# -ne 1 ]] &&{
@@ -44,6 +47,7 @@ function http_stop()
 
 case $1 in
     start | -s )
+        printf "http_start ...\n" 
         http_start
         ;;
     stop | -t )

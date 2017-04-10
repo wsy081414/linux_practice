@@ -33,8 +33,40 @@ int startup(const char *_ip, int _port)
 }
 void request_404(int sock)
 {
-    char buf[1024];
+    char* path = "wwwroot/404.html";
+    
+    struct stat ispath;
+    if(stat(path, &ispath) < 0)
+    {
+        return;
+    }
+    
+    int fd = open(path, O_RDONLY);
+    
+    if(fd < 0)
+    {
+        print_log("open failed!", FATAL);
+        return ;
+    }
+    char buf[SIZE];
+    
+    memset(buf,0,SIZE);
 
+    sprintf(buf,"HTTP/1.0 404 Not Found! \r\n\r\n");
+    
+    if(send(sock,buf,strlen(buf),0) < 0)
+    {
+        print_log("send filed",FATAL);
+        return;
+    }
+    
+    if(sendfile(sock, fd, NULL,sizeof(buf)) < 0)
+    {
+        print_log("sendfile failed",FATAL);
+        return ;
+    }
+
+    close(fd);
 }
 void echo_error(int sock, int err_code)
 {
@@ -43,11 +75,11 @@ void echo_error(int sock, int err_code)
         case 401:
         break;
         case 404:
-        request_404(sock);
+        request_404(sock); 
         break;
         case 503:
         break;
-        case 500
+        case 500:
         break;
         default:
         break;
@@ -112,26 +144,27 @@ static void echo_www(int sock, char *path, int _s)
     if(fd < 0)
     {
         print_log("open failed!", FATAL);
+        echo_error(sock, 404);
         return ;
     }
     char buf[SIZE];
     sprintf(buf,"HTTP/1.0 200 OK \r\n\r\n");
-
-    printf("buf:%s\n",buf);
+    
     if(send(sock,buf,strlen(buf),0) < 0)
     {
         print_log("send filed",FATAL);
+        echo_error(sock, 404);
         return;
     }
 
-    if(sendfile(sock, fd, NULL,_s) < 0)
+    if(sendfile(sock, fd, NULL, _s) < 0)
     {
         print_log("sendfile failed",FATAL);
+        echo_error(sock, 404);
         return ;
     }
 
     close(fd);
-    return;
 }
 
 static int excu_cgi(int sock, char *method, char *path, char* query_string)
@@ -162,6 +195,7 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
 
     if(content_length < 0)
     {
+        echo_error(sock, 404);
         return 1;
     }
 
@@ -174,16 +208,19 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
 
     if(pipe(input) < 0)
     {
+        echo_error(sock, 404);
         return 2;
     }
     if(pipe(output) < 0)
     {
+        echo_error(sock, 404);
         return 3;
     }
 
     pid_t id = fork();
     if(id < 0)
     {
+        echo_error(sock, 404);
         return 4;
     }
     else if(id == 0){
@@ -210,6 +247,7 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
             putenv(content_len);
         }
         execl(path,path,NULL);
+
         exit(1);
     }//child 
     else{
@@ -240,6 +278,7 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
         waitpid(id,NULL,0);
     }//father   
 }
+
 int handler_sock(int sock)
 {
     char buf[SIZE];
@@ -252,12 +291,14 @@ int handler_sock(int sock)
         ret = 6;
     }
 
+
     char method[METHOD_SIZE];
     char url[URL_SIZE];
 
+    memset(method, 0, METHOD_SIZE);
+    memset(url, 0, URL_SIZE);
+
     int i = 0,j = 0;
-    
-    printf("http:%s\n", buf);
 
     //进行截取请求方式
     while(i < sizeof(buf)-1 && j<sizeof(method)-1 && !isspace(buf[i]))
@@ -265,15 +306,12 @@ int handler_sock(int sock)
         method[j++] = buf[i++];
     }
     
-    printf("methed:%s\n",method);
     if(strcasecmp(method, "GET") && strcasecmp(method, "POST"))
     {
-        printf("end\n");
-        //echo_error();
+        echo_error(sock, 404);
         goto end;
     }
     
-
     if(isspace(buf[i]) && i<sizeof(buf)-1)
     {
         i++;
@@ -285,8 +323,12 @@ int handler_sock(int sock)
     {
         url[j++]=buf[i++];
     }
+
+
+
+
     char *query_string =NULL;
-    printf("url:%s\n",url);
+    
     int cgi=0;
     if(strcasecmp(method,"POST")==0)
     {
@@ -307,50 +349,47 @@ int handler_sock(int sock)
         }
     }
 
-        char path[SIZE];
-        sprintf(path, "wwwroot%s", url);
-        if( path[strlen(path)-1] == '/')
+
+    char path[SIZE];
+    memset(path, 0, SIZE);
+    sprintf(path, "wwwroot%s", url);
+    if( path[strlen(path)-1] == '/')
+    {
+        strcat(path,"index.html");
+    }
+
+    struct stat ispath;
+
+    if(stat(path,&ispath) < 0)
+    {
+        print_log("stat failed",FATAL);
+        echo_error(sock, 404);
+        goto end;
+    }
+    else {
+        if ( ispath.st_mode & S_IFDIR )
         {
-            strcat(path,"index.html");
+            strcat(path,"/index.html");
         }
-
-        printf("path:%s\n",path);
-
-        struct stat ispath;
-
-        if(stat(path,&ispath) < 0)
+        else if((ispath.st_mode & S_IXUSR)|| \
+               (ispath.st_mode & S_IXGRP)|| \
+               (ispath.st_mode & S_IXOTH))
         {
-            print_log("stat failed",FATAL);
-            //echo_error
-            goto end;
+            cgi = 1;
         }
-        else {
-            if ( ispath.st_mode & S_IFDIR )
-            {
-                strcat(path,"/index.html");
-            }
-            else if((ispath.st_mode & S_IXUSR)|| \
-                   (ispath.st_mode & S_IXGRP)|| \
-                   (ispath.st_mode & S_IXOTH))
-            {
-                cgi = 1;
-            }
-        }
+    }
 
-        printf("path:%s\n",path);
-        printf("cgi:%d\n",cgi);
-        if (cgi){
-            //对于cgi模式，我们需要对参数进行处理,method记录请求方法，path记录了资源路径，query_string记录的是参数。
-            ret = excu_cgi(sock, method, path, query_string);
+    if (cgi){
+        //对于cgi模式，我们需要对参数进行处理,method记录请求方法，path记录了资源路径，query_string记录的是参数。
+        ret = excu_cgi(sock, method, path, query_string);
 
-        }//fi
-        else{
-            //非cgi模式，此时需要把这个HTTP报文进行全部访问完毕，防止出现后续出现以后报文粘包问题。
-            printf("echo_www:\n");
-            clear_header(sock);
-            //接下来进行最简单的非cgi版本的操作，直接把这个资源发送过去。
-            echo_www(sock, path, sizeof(path));
-        }//else
+    }//fi
+    else{
+        //非cgi模式，此时需要把这个HTTP报文进行全部访问完毕，防止出现后续出现以后报文粘包问题。
+        clear_header(sock);
+        //接下来进行最简单的非cgi版本的操作，直接把这个资源发送过去。
+        echo_www(sock, path, sizeof(path));
+    }//else
 
 end:
     close(sock);

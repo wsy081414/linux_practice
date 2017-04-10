@@ -42,19 +42,20 @@ ${SERVER_NAME} :${OBJ}
 
 .PHONY:cgi
 cgi:
-    cd cgi;cd cgi_bin;make;make output;cd -;cd ..
+    cd cgi;cd cgi_bin;make;make output;cd -;cd ..;
+    cp -rf ${ROOT_PATH}/cgi/cgi_bin ${ROOT_PATH}/wwwroot
 
 .PHONY :clean
 clean:
-    rm -rf ${SERVER_NAME} ${OBJ} output; cd cgi;cd cgi_bin;make clean;cd -;cd .. 
+    rm -rf ${SERVER_NAME} ${OBJ} output cgi_math; cd cgi;cd cgi_bin;make clean;cd -;cd .. 
+    rm -rf ${ROOT_PATH}/wwwroot/cgi_bin
 .PHONY :output
 output:all
     mkdir output
     cp -rf log output/
     cp -rf conf output/
     cp -rf wwwroot output/
-    mkdir -p output/wwwroot/cgi_bin
-    cp -f cgi_math output/wwwroot/cgi_bin/
     cp -r http_ctl.sh output/
+    cp -r ${SERVER_NAME} output/
 
 EOF
