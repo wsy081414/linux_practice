@@ -1,7 +1,6 @@
 .PHONY:all
 all:httpd cgi
 
-
 httpd :httpd.o main.o
 	gcc -o $@ $^ -lpthread
 %.o :%.c 

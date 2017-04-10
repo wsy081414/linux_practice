@@ -31,6 +31,7 @@ int startup(const char *_ip, int _port)
 
     return sock;
 }
+
 void request_404(int sock)
 {
     char* path = "wwwroot/404.html";
@@ -89,13 +90,28 @@ void echo_error(int sock, int err_code)
 void print_log(char *log_massage,int level)
 {
     char *arr[10]={
-        "NORMAL",
-        "WARNING",
-        "FATAL"
+        " NORMAL",
+        " WARNING",
+        " FATAL"
     };
+    #define __debug__
     #ifdef __debug__
-        printf("%s ,%s ",log_massage,arr[level]);
+    printf("enter print_log\n");
+    char *log_file_path = "log/wwwlog";
+    int fd = open(log_file_path, O_WRONLY|O_APPEND|O_CREAT,0644);
+    char buf[SIZE];
+    memset(buf, 0, SIZE);
+    strncpy(buf, log_massage, strlen(log_massage));
+    strncat(buf, arr[level], strlen(arr[level]));
+    time_t timep;
+    char te[30];
+    te[0] = ' ';
+    time(&timep);
+    strcpy(te+1,ctime(&timep));
+    strcat(buf,te);
+    write(fd ,buf,strlen(buf));
     #endif 
+    close(fd);
 }
 
 static int get_line(int sock, char * buf, int len)
@@ -291,7 +307,6 @@ int handler_sock(int sock)
         ret = 6;
     }
 
-
     char method[METHOD_SIZE];
     char url[URL_SIZE];
 
@@ -323,9 +338,6 @@ int handler_sock(int sock)
     {
         url[j++]=buf[i++];
     }
-
-
-
 
     char *query_string =NULL;
     
@@ -362,6 +374,7 @@ int handler_sock(int sock)
 
     if(stat(path,&ispath) < 0)
     {
+        printf("stat\n");
         print_log("stat failed",FATAL);
         echo_error(sock, 404);
         goto end;
