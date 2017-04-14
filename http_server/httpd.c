@@ -104,10 +104,11 @@ void print_log(char *log_massage,int level)
     strncpy(buf, log_massage, strlen(log_massage));
     strncat(buf, arr[level], strlen(arr[level]));
     time_t timep;
+
     char te[30];
-    te[0] = ' ';
+    te[0]=' ';
     time(&timep);
-    strcpy(te+1,ctime(&timep));
+    ctime_r(&timep,te+1);
     strcat(buf,te);
     write(fd ,buf,strlen(buf));
     #endif 
@@ -166,6 +167,8 @@ static void echo_www(int sock, char *path, int _s)
     char buf[SIZE];
     sprintf(buf,"HTTP/1.0 200 OK \r\n\r\n");
     
+
+
     if(send(sock,buf,strlen(buf),0) < 0)
     {
         print_log("send filed",FATAL);

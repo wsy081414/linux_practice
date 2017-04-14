@@ -43,7 +43,8 @@ ${SERVER_NAME} :${OBJ}
 .PHONY:cgi
 cgi:
     cd cgi;cd cgi_bin;make;make output;cd -;cd ..;
-    cp -rf ${ROOT_PATH}/cgi/cgi_bin ${ROOT_PATH}/wwwroot
+    cd ${ROOT_PATH}/wwwroot;mkdir cgi_bin;
+    cp ${ROOT_PATH}/cgi_math ${ROOT_PATH}/wwwroot/cgi_bin/
 
 .PHONY :clean
 clean:

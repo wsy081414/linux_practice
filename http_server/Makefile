@@ -1,6 +1,7 @@
 .PHONY:all
 all:httpd cgi
 
+
 httpd :httpd.o main.o
 	gcc -o $@ $^ -lpthread
 %.o :%.c 
@@ -9,11 +10,12 @@ httpd :httpd.o main.o
 .PHONY:cgi
 cgi:
 	cd cgi;cd cgi_bin;make;make output;cd -;cd ..;
-	cp -rf /home/yuzhe/code/http_server/cgi/cgi_bin /home/yuzhe/code/http_server/wwwroot
+	cd /home/yuzhe/code/http_server/wwwroot;mkdir cgi_bin;
+	cp /home/yuzhe/code/http_server/cgi_math /home/yuzhe/code/http_server/wwwroot/cgi_bin/
 
 .PHONY :clean
 clean:
-	rm -rf httpd httpd.o main.o  cgi_math; cd cgi;cd cgi_bin;make clean;cd -;cd .. 
+	rm -rf httpd httpd.o main.o output cgi_math; cd cgi;cd cgi_bin;make clean;cd -;cd .. 
 	rm -rf /home/yuzhe/code/http_server/wwwroot/cgi_bin
 .PHONY :output
 output:all
