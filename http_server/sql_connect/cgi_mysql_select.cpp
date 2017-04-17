@@ -5,9 +5,8 @@
 	> Created Time: Sat 08 Apr 2017 12:53:24 AM PDT
  ************************************************************************/
 
-#include<stdio.h>
+#include"sql_api.h"
 #include<stdlib.h>
-#include<unistd.h>
 #include<string.h>
 #define SIZE 4096
 int main()
@@ -49,9 +48,10 @@ int main()
             return 3;
         }
     }//POST
+    
 
     //到这里以后，就可以确定此时我的content_length当中已经保留了需要的参数。
-    char *arr[3];
+    char *arr[5];
     int i = 0;
     int j = 0;
     char *string_start = content_data;
@@ -69,16 +69,45 @@ int main()
         else{}
         string_start++;
     }
+    arr[4] = NULL;
+    cout<<arr[0]<<" "<<arr[1]<<" "<<arr[2]<<" "<<arr[3]<<" "<<endl;
+    string data = "";
+    cout<<data.c_str()<<endl;
+    int n=5;
+    for(int j=0; j<n; j++)
+    {
+        if(j == 2)
+        {
+            data +=arr[j];
+            data +=",";
+            continue;
+        }
+
+        if(j == n-1)
+            break;
+        data+="\'";
+        cout<<data<<endl;
+        data+=arr[j];
+        data+="\'";
+        if(j < n-2)
+            data +=",";
+    }
+    cout<<data.c_str()<<endl;
 
 
-    int data1 = atoi(arr[0]);
-    int data2 = atoi(arr[1]);
-    
-    printf("<html>\n");
-    printf("<h1>%d + %d = %d</h1><br/>\n",data1,data2,data1+data2);
-    printf("<h1>%d - %d = %d</h1><br/>\n",data1,data2,data1-data2);
-    printf("<h1>%d * %d = %d</h1><br/>\n",data1,data2,data1*data2);
-    printf("<h1>%d / %d = %d</h1><br/>\n",data1,data2,data1/data2);
-    printf("<h1>%d %% %d = %d</h1><br/>\n",data1,data2,data1%data2);
-    printf("</html>");
+    sqlopt a;
+    a.sql_connect();
+    a.sql_select(data);
+
+
+    //int data1 = atoi(arr[0]);
+    //int data2 = atoi(arr[1]);
+    //
+    //printf("<html>\n");
+    //printf("<h1>%d + %d = %d</h1><br/>\n",data1,data2,data1+data2);
+    //printf("<h1>%d - %d = %d</h1><br/>\n",data1,data2,data1-data2);
+    //printf("<h1>%d * %d = %d</h1><br/>\n",data1,data2,data1*data2);
+    //printf("<h1>%d / %d = %d</h1><br/>\n",data1,data2,data1/data2);
+    //printf("<h1>%d %% %d = %d</h1><br/>\n",data1,data2,data1%data2);
+    //printf("</html>");
 }

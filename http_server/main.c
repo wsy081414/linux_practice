@@ -15,7 +15,7 @@ int main(int argc,char *argv[])
     }
     int listen_sock = startup(argv[1],atoi(argv[2]));
     
-    int _r = daemon(1,0);
+    //int _r = daemon(1,0);
 
     while(1)
     {

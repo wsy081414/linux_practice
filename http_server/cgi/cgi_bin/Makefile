@@ -1,6 +1,6 @@
 
 cgi_math:cgi_math.c
-    gcc -o $@ $^
+	gcc -o $@ $^
 
 .PHONY:clean
 clean:

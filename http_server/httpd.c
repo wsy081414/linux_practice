@@ -96,7 +96,6 @@ void print_log(char *log_massage,int level)
     };
     #define __debug__
     #ifdef __debug__
-    printf("enter print_log\n");
     char *log_file_path = "log/wwwlog";
     int fd = open(log_file_path, O_WRONLY|O_APPEND|O_CREAT,0644);
     char buf[SIZE];
@@ -151,7 +150,7 @@ static int clear_header(int sock)
     int ret = -1;
     do{
         ret = get_line(sock,buf,sizeof(SIZE));
-    }while(ret != 1 && strcmp(buf, "\n") != 0);
+    }while((ret != 1) && (strcmp(buf, "\n") != 0));
     return ret;
 }
 
@@ -160,7 +159,6 @@ static void echo_www(int sock, char *path, int _s)
     int fd = open(path, O_RDONLY);
     if(fd < 0)
     {
-        print_log("open failed!", FATAL);
         echo_error(sock, 404);
         return ;
     }
@@ -171,14 +169,11 @@ static void echo_www(int sock, char *path, int _s)
 
     if(send(sock,buf,strlen(buf),0) < 0)
     {
-        print_log("send filed",FATAL);
         echo_error(sock, 404);
         return;
     }
-
     if(sendfile(sock, fd, NULL, _s) < 0)
     {
-        print_log("sendfile failed",FATAL);
         echo_error(sock, 404);
         return ;
     }
@@ -194,6 +189,7 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
     {
         //GET方法
         clear_header(sock);
+        printf("query_strin clearg:%s",query_string);
         // 此时的query_string就是记录的参数，后期进行使用就好了。
     }else{
         //POST方法，这个时候所需要做的是取出POST的参数，这个POST的参数是在POST的正文处。
@@ -202,25 +198,23 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
         //POST
         do{
             ret = get_line(sock, buf, sizeof(buf));
-            if(strncasecmp(buf, "Content-Length: ", strlen("Content-Length: ")))
+            if(strncasecmp(buf, "Content-Length: ", strlen("Content-Length: "))==0 )
             {
                 content_length = atoi (buf+strlen("content_length: "));
             }
 
         }while(ret != 1 && strcmp(buf, "\n") != 0);
-
+         if(content_length < 0)
+         {
+             echo_error(sock, 404);
+             return 1;
+         }
         
     }//else
 
-    if(content_length < 0)
-    {
-        echo_error(sock, 404);
-        return 1;
-    }
-
-    char buf[SIZE];
-    sprintf(buf,"HTTP/1.0 200 OK \r\n\r\n"); 
+    char * buf = "HTTP/1.0 200 OK \r\n\r\n";
     send(sock, buf, strlen(buf), 0);
+
 
     int input[2];
     int output[2];
@@ -247,24 +241,28 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
         close(input[1]);// 关闭写端
         close(output[0]);//关闭读端
 
-        dup2(input[0], 0);
-        dup2(output[1], 1);
         
         char method_env[SIZE/8];
         char content_len[SIZE/8];
-
+        char query_char[SIZE];
+        memset(method_env,0,sizeof(method_env));
+        memset(content_len,0,sizeof(content_len));
+        memset(query_char,0,sizeof(query_char));
         sprintf(method_env,"METHOD=%s", method);
         putenv(method_env);
 
         if(strcasecmp(method,"GET") == 0)
         {
-            sprintf(content_len, "QUERY_STRING=%s", query_string);
-            putenv(content_len);
+            sprintf(query_char, "QUERY_STRING=%s", query_string);
+            putenv(query_char);
         }
         else{
             sprintf(content_len, "CONTENT_LEN=%d", content_length);
             putenv(content_len);
         }
+        
+        dup2(input[0], 0);
+        dup2(output[1], 1);
         execl(path,path,NULL);
 
         exit(1);
@@ -274,25 +272,21 @@ static int excu_cgi(int sock, char *method, char *path, char* query_string)
         close(input[0]);
         close(output[1]);
 
-        if(strcasecmp(method, "GET") == 0){   
-            //GET
-        }
-        else{
+        char ch;
+        if(strcasecmp(method, "POST") == 0){
             //POST
-            
-            char ch;
             int i = 0;
             for(i = 0; i < content_length; i++)
             {
                 recv(sock, &ch, 1, 0);
                 write(input[1], &ch, 1);
             }
-
-            char ouput_data[SIZE];
-            while(read(output[0],&ch,1))
-            {
-                send(sock, &ch, 1, 0);
-            }
+        }
+    
+        
+        while(read(output[0], &ch, 1) > 0)
+        {
+            send(sock, &ch, 1, 0);
         }
         waitpid(id,NULL,0);
     }//father   
@@ -303,25 +297,27 @@ int handler_sock(int sock)
     char buf[SIZE];
     int ret;
 
-    //进行读取一行
+    //进行读取i行
     if(get_line(sock, buf, sizeof(buf)) < 0)
     {
         print_log("get_line error",WARNING);
         ret = 6;
     }
-
+    printf("buf: %s\n");
     char method[METHOD_SIZE];
     char url[URL_SIZE];
 
-    memset(method, 0, METHOD_SIZE);
-    memset(url, 0, URL_SIZE);
+    memset(method, 0, sizeof(method));
+    memset(url, 0, sizeof(url));
 
     int i = 0,j = 0;
 
     //进行截取请求方式
     while(i < sizeof(buf)-1 && j<sizeof(method)-1 && !isspace(buf[i]))
     {
-        method[j++] = buf[i++];
+        method[j] = buf[i];
+        j++;
+        i++;
     }
     
     if(strcasecmp(method, "GET") && strcasecmp(method, "POST"))
@@ -339,8 +335,12 @@ int handler_sock(int sock)
 
     while(j < sizeof(url)-1 && i < sizeof(buf)-1 && !isspace(buf[i]))
     {
-        url[j++]=buf[i++];
+        url[j]=buf[i];
+        j++;
+        i++;
     }
+    printf("method:%s\n",method);
+    printf("url:%s\n",url);
 
     char *query_string =NULL;
     
@@ -363,7 +363,7 @@ int handler_sock(int sock)
             cgi=1;
         }
     }
-
+    printf("query_string:%s\n",query_string);
 
     char path[SIZE];
     memset(path, 0, SIZE);
@@ -375,6 +375,7 @@ int handler_sock(int sock)
 
     struct stat ispath;
 
+    printf("path:%s\n",path);
     if(stat(path,&ispath) < 0)
     {
         printf("stat\n");
@@ -404,7 +405,7 @@ int handler_sock(int sock)
         //非cgi模式，此时需要把这个HTTP报文进行全部访问完毕，防止出现后续出现以后报文粘包问题。
         clear_header(sock);
         //接下来进行最简单的非cgi版本的操作，直接把这个资源发送过去。
-        echo_www(sock, path, sizeof(path));
+        echo_www(sock, path, ispath.st_size);
     }//else
 
 end:
