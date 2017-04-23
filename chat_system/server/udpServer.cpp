@@ -1,16 +1,16 @@
 /*************************************************************************
-	> File Name: udpServer.cpp
-	> Author:yuzhe 
-	> Mail:953659912@qq.com 
-	> Created Time: Sun 23 Apr 2017 01:17:12 AM PDT
- ************************************************************************/
+> File Name: udpServer.cpp
+> Author:yuzhe 
+> Mail:953659912@qq.com 
+> Created Time: Sun 23 Apr 2017 01:17:12 AM PDT
+************************************************************************/
 
 #include<iostream>
 using namespace std;
 
 udpServer::udpServer(const int &port,const string &ip)
-    :_port(port)
-    ,_ip(ip)
+:_port(port)
+,_ip(ip)
 {
 }
 udpServer::~udpServer()
@@ -35,7 +35,7 @@ int udpServer::sendData(const string &outstring,struct sockaddr_in &remote)
     ssize_t _s = sendto(_scok, outstring.c_str(), outstring.size(), 0,(struct sockaddr *)&remote , sizeof(remote));
     if(_s < 0)
     {
-        
+
     }
     return _s
 }
