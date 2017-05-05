@@ -18,7 +18,7 @@ sqlopt::~sqlopt()
 int sqlopt::sql_connect()
 {
     bool ret = true;
-    if(mysql_real_connect(&m_sql, "127.0.0.1", "root","111","http_server", 3306, NULL,0 ) == NULL)
+    if(mysql_real_connect(&m_sql, "127.0.0.1", "root","","http_server", 3306, NULL,0 ) == NULL)
     {
         cout<<"real_connect failed"<<endl;
         ret =false;

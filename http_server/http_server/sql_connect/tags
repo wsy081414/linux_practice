@@ -1,0 +1,31 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+INCLUDE_PATH	Makefile	/^INCLUDE_PATH=-I$(ROOT_PATH)\/..\/lib\/include$/;"	m
+LIB_PATH	Makefile	/^LIB_PATH=-L$(ROOT_PATH)\/..\/lib\/lib$/;"	m
+ROOT_PATH	Makefile	/^ROOT_PATH=$(shell pwd)$/;"	m
+SIZE	cgi_math.c	12;"	d	file:
+SIZE	cgi_mysql_delete.cpp	11;"	d	file:
+SIZE	cgi_mysql_insert.cpp	11;"	d	file:
+SIZE	cgi_mysql_select.cpp	12;"	d	file:
+SIZE	cgi_mysql_update.cpp	11;"	d	file:
+_SQL_API_H	sql_api.h	9;"	d
+cc	Makefile	/^cc=g++$/;"	m
+lib	Makefile	/^lib=-lmysqlclient $/;"	m
+m_sql	sql_api.h	/^    MYSQL m_sql;$/;"	m	class:sqlopt
+main	cgi_math.c	/^int main()$/;"	f
+main	cgi_mysql_delete.cpp	/^int main()$/;"	f
+main	cgi_mysql_insert.cpp	/^int main()$/;"	f
+main	cgi_mysql_select.cpp	/^int main()$/;"	f
+main	cgi_mysql_update.cpp	/^int main()$/;"	f
+sql_connect	sql_api.cpp	/^int sqlopt::sql_connect()$/;"	f	class:sqlopt
+sql_delete	sql_api.cpp	/^void sqlopt::sql_delete(const string& data)$/;"	f	class:sqlopt
+sql_insert	sql_api.cpp	/^int sqlopt::sql_insert(const string& data)$/;"	f	class:sqlopt
+sql_select	sql_api.cpp	/^void sqlopt::sql_select(const string& data)$/;"	f	class:sqlopt
+sql_update	sql_api.cpp	/^void sqlopt::sql_update(const string &data)$/;"	f	class:sqlopt
+sqlopt	sql_api.cpp	/^sqlopt::sqlopt()$/;"	f	class:sqlopt
+sqlopt	sql_api.h	/^class sqlopt$/;"	c
+~sqlopt	sql_api.cpp	/^sqlopt::~sqlopt()$/;"	f	class:sqlopt

@@ -10,8 +10,7 @@ httpd :httpd.o main.o
 .PHONY:cgi
 cgi:
 	cd cgi;cd cgi_bin;make;make output;cd -;cd ..;
-	cd /home/yuzhe/code/http_server/wwwroot;mkdir cgi_bin;
-	cp /home/yuzhe/code/http_server/cgi_math /home/yuzhe/code/http_server/wwwroot/cgi_bin/
+	cp /home/yuzhe/code/http_server/cgi_math /home/yuzhe/code/http_server/wwwroot/
 
 .PHONY :clean
 clean:
