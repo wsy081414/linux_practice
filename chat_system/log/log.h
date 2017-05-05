@@ -7,4 +7,18 @@
 
 #ifndef _LOG_H
 #define _LOG_H
+#include<iostream>
+#include<string>
+
+string log_level[]=
+{
+    "DEBUG",
+    "INFO",
+    "WARN",
+    "ERROR",
+    "FATAL"
+}
+
+void print_log(string msg,int level);
+
 #endif

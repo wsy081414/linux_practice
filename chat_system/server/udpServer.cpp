@@ -21,10 +21,12 @@ int udpServer::recvData(string &instring)
 {
     struct sockaddr_in remote;
     socklen_t len = sizeof(remote);
-
-    ssize_t _s = recvfrom(_sock , instring.c_str(), sizeof(instring), 0, (struct sockaddr *)&remote , &len);
+    char buf[1024];
+    ssize_t _s = recvfrom(_sock , buf, sizeof(buf), 0, (struct sockaddr *)&remote , &len);
     if(_s > 0 )
     {
+        buf[_s] = '\0';
+        instring = buf;
         addUser(remote);
         putData(instring);
     }
@@ -35,7 +37,7 @@ int udpServer::sendData(const string &outstring,struct sockaddr_in &remote)
     ssize_t _s = sendto(_scok, outstring.c_str(), outstring.size(), 0,(struct sockaddr *)&remote , sizeof(remote));
     if(_s < 0)
     {
-
+        //print_log
     }
     return _s
 }
@@ -72,5 +74,5 @@ void udpServer::broadCast()
 }
 void udpServer::addUser(struct sockaddr_in& remote)
 {
-    map.insert(std::pair<be32 , sockaddr_in>(remote.sin_addr.s_addr, remote));
+    userList.insert(std::pair<be32 , sockaddr_in>(remote.sin_addr.s_addr, remote));
 }
