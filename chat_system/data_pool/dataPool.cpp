@@ -23,6 +23,8 @@ dataPool::~dataPool();
 {
     _size = 0;
     _capacity = 0;
+    producter_count = 0;
+    consumer_count = 0;
     sem_destroy(&blank);
     sem_destroy(&data);
 }

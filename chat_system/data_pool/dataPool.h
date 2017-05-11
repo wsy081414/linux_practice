@@ -13,7 +13,7 @@
 using namespace std;
 class dataPool{
 public:
-    dataPool();
+    dataPool(const int &capacity)
     ~dataPool();
     void getData(string& outstring);
     void putData(const string &instring);

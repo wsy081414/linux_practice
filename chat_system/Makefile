@@ -5,34 +5,82 @@ COMM_PATH=${ROOT_PATH}/comm
 WINDOW_PATH=${ROOT_PATH}/window
 LOG_PATH=${ROOT_PATH}/log
 CONF_PATH=${ROOT_PATH}/conf
+LIB_PATH=$(ROOT_PATH)/lib
+DATAPOOL_PATH=$(ROOT_PATH)/pool
 
 CC=g++
 
-SERVER_BIN=server
-CLIENT_BIN=client
+LIB=-lpthread -ljson
+L_PATH=-L$(LIB_PATH)/lib
+
+INCLUDE=-I$(DATAPOOL_PATH) -I$(LOG_PATH) -I$(WINDOW_PATH) -I$(COMM_PATH) -I$(LIB_PATH)/include -I$(COMM_PATH)
+
+SERVER=UdpServer
+CLIENT=UdpClient
 
 
+SERVER_SRC=$(shell ls $(SERVER_PATH) $(DATAPOOL_PATH) $(COMM_PATH) $(LOG_PATH) | egrep -v '.*\.h' | egrep '.*\.cpp')
+CLIENT_SRC=$(shell ls $(CLIENT_PATH) $(LOG_PATH) $(COMM_PATH) $(WINDOW_PATH) | egrep -v '.*\.h' | egrep '.*\.cpp')
 
-SERVER_OBJ=$(shell ls ${SERVER_PATH} | egrep ^.*.cpp$ | sed 's/\.cpp/\.o/g')
-CLIENT_OBJ=$(shell ls ${CLIENT_PATH} | egrep ^.*.cpp$ | sed 's/\.cpp/\.o/g')
+SERVER_OBJ=$(shell echo $(SERVER_SRC) | sed 's/\.cpp/\.o/g')
+CLIENT_OBJ=$(shell echo $(CLIENT_SRC) | sed 's/\.cpp/\.o/g')
+
 
 .PHONY:all
-all:
-	echo $(CLIENT_OBJ)
+all:$(CLIENT) $(SERVER)
+
+$(SERVER):$(SERVER_OBJ)
+	@echo Link [$^] to [$@] ...	
+	$(CC) -o $@ $^ $(LIB)  $(L_PATH) -static
+	@echo Link done...
+
+$(CLIENT):$(CLIENT_OBJ)
+	@echo Link [$^] to [$@] ...
+	$(CC) -o $@ $^ $(LIB) -lncurses $(L_PATH) -static
+	@echo Link done...
+
+%.o:$(SERVER_PATH)/%.cpp
+	@echo Compling [$^] to [$@] ...
+	$(CC) -c $< $(INCLUDE) 
+
+%.o:$(CLIENT_PATH)/%.cpp
+	@echo Compling [$^] to [$@] ... 
+	$(CC) -c $< $(INCLUDE)
+
+%.o:$(DATAPOOL_PATH)/%.cpp
+	@echo Compling [$^] to [$@] ...
+	$(CC) -c $<
+%.o:$(LOG_PATH)/%.cpp
+	@echo Compling [$^] to [$@] ...
+	$(CC) -c $<
+%.o:$(WINDOW_PATH)/%.cpp
+	@echo Compling [$^] to [$@] ...
+	$(CC) -c $<
+%.o:$(COMM_PATH)/%.cpp
+	@echo Compling [$^] to [$@] ...
 
 
-#all:${SERVER_SRC} ${CLIENT_SRC}
-#
-#$(SERVER_SRC):$(SERVER_OBJ)
-#	$(CC) -o $@ $^
-#%.o:$(SERVER_PATH)/%.cpp
-#	$(CC) -c $<
-#
-#$(CLIENT_SRC):$(CLIENT_OBJ)
-#	$(CC) -o $@ $^
-#%.o:$(CLIENT_PATH)/%.cpp
-#	$(cc) -c %<
+
+.PHONY:output
+output:
+	mkdir -p output/log
+	cp $(SERVER) output/
+	cp $(CLIENT) output/
+	cp -rf conf output/
+	cp server_ctl.sh output/
+	cp client_ctl.sh output/
+
+
 
 .PHONY:clean
 clean:
+	rm -rf $(SERVER) $(CLIENT) *.o output
+
+.PHONY:debug
+debug:
+	@echo $(SERVER_SRC)
+	@echo $(CLIENT_SRC)
+	@echo $(SERVER_OBJ)
+	@echo $(CLIENT_OBJ)
+
 
